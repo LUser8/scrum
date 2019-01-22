@@ -15,9 +15,12 @@ class SprintSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_links(self, obj):
         request = self.context['request']
-        return {
-            'self': reverse('sprint-detail', kwargs={'pk': obj.pk}, request=request,)
+        links = {
+            'self': reverse('sprint-detail', kwargs={'pk': obj.pk}, request=request, ),
+            'tasks':  reverse('task-list', request=request) + '?sprint={}'.format(obj.pk)
         }
+
+        return links
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -42,9 +45,9 @@ class TaskSerializer(serializers.ModelSerializer):
             'assigned': None
         }
         if obj.sprint_id:
-            links['sprint'] = reverse('sprint-detail', kwargs={'pk':obj.sprint_id}, request=request)
+            links['sprint'] = reverse('sprint-detail', kwargs={'pk': obj.sprint_id}, request=request)
         if obj.assigned:
-            links['assigned'] = reverse('user-detail', kwargs={User.USERNAME_FIELD:obj.assigned}, request=request)
+            links['assigned'] = reverse('user-detail', kwargs={User.USERNAME_FIELD: obj.assigned}, request=request)
         return links
 
 
@@ -59,5 +62,6 @@ class UserSerializer(serializers.ModelSerializer):
     def get_links(self, obj):
         request = self.context['request']
         return {
-            'self': reverse('user-detail', kwargs={User.USERNAME_FIELD: obj.username}, request=request,)
+            'self': reverse('user-detail', kwargs={User.USERNAME_FIELD: obj.username}, request=request,),
+            'tasks': '{}?assigned={}'.format(reverse('task-list', request=request), obj.username)
         }
